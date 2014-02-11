@@ -1,6 +1,7 @@
-# LtiTemplateBuilder
+# LTI Template Builder
 
-TODO: Write a gem description
+Template generator for building LTI apps quickly on top of Rails
+mountable engines.
 
 ## Installation
 
@@ -18,7 +19,28 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+To build a Rails template, you need to instanciate the builder and then
+add recipes to it.
+
+Example:
+
+```ruby
+require 'lti_template_builder'
+builder = LtiTemplateBuilder::Builder.new
+
+# Add recipes
+builder.add :bootstrap_sass
+builder.add :cors_support
+builder.add :rspec
+builder.add :lti_extension, { enabled_extensions: [:editor_button, :resource_selection] }
+builder.add :extra
+
+# Print out the generated template.rb
+puts builder.to_script
+
+# Write builder to file
+builder.save_to_file("path/to/template.rb")
+```
 
 ## Contributing
 
