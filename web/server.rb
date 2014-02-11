@@ -15,7 +15,7 @@ class Server < Sinatra::Base
     builder.add :rspec
     builder.add :lti_extension, { enabled_extensions: [:editor_button, :resource_selection] }
     builder.add :extra
-    builder.to_s
+    builder.to_script
   end
 
 end

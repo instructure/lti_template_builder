@@ -1,3 +1,5 @@
+require 'erb'
+
 module LtiTemplateBuilder
   class Recipe
     attr_accessor :gem_dependencies, :gem_dev_dependencies, :after_bundle_commands

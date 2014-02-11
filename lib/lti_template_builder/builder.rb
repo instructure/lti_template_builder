@@ -30,7 +30,7 @@ module LtiTemplateBuilder
       @recipes << { name: name.to_sym, recipe: recipe.render }
     end
 
-    def to_s
+    def to_script
       add_gem_recipe
       ret = []
       @recipes.each do |item|
@@ -41,7 +41,11 @@ module LtiTemplateBuilder
     end
 
     def render_to_screen
-      puts self.to_s
+      puts self.to_script
+    end
+
+    def save_to_file(path)
+      File.open(path, "w") { |file| file.write(self.to_script) }
     end
   end
 end
