@@ -44,6 +44,9 @@ puts builder.to_script
 
 # Write builder to file
 builder.save_to_file("path/to/template.rb")
+
+# Build the new app
+rails plugin new my_lti_app -T --mountable --dummy-path=spec/test_app -m path/to/template.rb
 ```
 
 ## Contributing
