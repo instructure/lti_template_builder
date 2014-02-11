@@ -2,6 +2,15 @@ inject_into_file "app/controllers/#{name}/lti_controller.rb", after: "def index\
       @launch_params = params.reject!{ |k,v| ['controller','action'].include? k }
     end
 
+    def launch
+      url = params[:url]
+      if url && url =~ /\\Ahttps?:\\/\\/.+\\..+\\Z/
+        redirect_to url
+      else
+        head 500
+      end
+    end
+
     def embed
       launch_params = JSON.parse(params[:launch_params] || "{}")
 
@@ -12,23 +21,24 @@ inject_into_file "app/controllers/#{name}/lti_controller.rb", after: "def index\
       # This should be replaced by actual logic.
       embed_type = params[:embed_type]
       if embed_type =~ /Video/
+        @content_type = "iframe"
         @title = "Getting Started in Canvas Network"
-        @url = "//player.vimeo.com/video/79702646"
+        @url = "https://player.vimeo.com/video/79702646"
         @width = "500"
         @height = "284"
       elsif embed_type =~ /Picture/
+        @content_type = "image_url"
         @title = "Laughing Dog"
         @url = "https://dl.dropboxusercontent.com/u/2176587/laughing_dog.jpeg"
         @width = "284"
         @height = "177"
-      else
-        @title  = "My Lti App"
-        @url    = "\#{root_url}" # <-- build return URL
-        @width  = 500 # <-- modal width (if applicable)
-        @height = 530 # <-- modal height (if applicable)
+      elsif embed_type =~ /Link/
+        @content_type = "url"
+        @title  = "Edu App Center"
+        @url    = "https://www.eduappcenter.com"
       end
 
-      redirect_url = build_url(tp, @title, @url, @width, @height)
+      redirect_url = build_url(tp, @title, @url, @width, @height, @content_type)
 
       if redirect_url.present?
         redirect_to redirect_url
@@ -58,14 +68,18 @@ inject_into_file "app/controllers/#{name}/lti_controller.rb", after: "def index\
 
     private
 
-    def build_url(tp, title, url, width, height)
+    def build_url(tp, title, url, width, height, content_type)
       if tp.accepts_content?
-        if tp.accepts_iframe?
+        redirect_url = nil
+        if content_type == "image_url" && tp.accepts_url?
+          redirect_url = tp.image_content_return_url(url, width, height, title)
+        elsif content_type == "iframe" && tp.accepts_iframe?
           redirect_url = tp.iframe_content_return_url(url, width, height, title)
         elsif tp.accepts_url?
-          redirect_url = tp.url_content_return_url(url, title)
+          redirect_url = tp.url_content_return_url(url, title, title)
         elsif tp.accepts_lti_launch_url?
-          redirect_url = tp.lti_launch_content_return_url(url, title, title)
+          launch_url = launch_url(url: url)
+          redirect_url = tp.lti_launch_content_return_url(launch_url, title, title)
         end
         return redirect_url
       end
@@ -76,6 +90,7 @@ route 'root "lti#index"'
 route 'match "/" => "lti#index", via: [:get, :post]'
 route 'get "health_check" => "lti#health_check"'
 route 'get "config(.xml)" => "lti#xml_config", as: :lti_xml_config'
+route 'match  "launch" => "lti#launch", as: :launch, via: [:get, :post]'
 
 remove_file "app/views/#{name}/lti/index.html.erb"
 create_file "app/views/#{name}/lti/index.html.erb" do <<-'RUBY'
@@ -92,13 +107,17 @@ create_file "app/views/#{name}/lti/index.html.erb" do <<-'RUBY'
   <%%= form_tag lti_embed_path do %>
     <input type="hidden" name="launch_params" value="<%%= @launch_params.to_json %>" />
     <div class="row">
-      <div class="col-xs-6">
-        <input type="submit" name="embed_type" class="btn btn-large btn-info btn-block" 
+      <div class="col-xs-4">
+        <input type="submit" name="embed_type" class="btn btn-large btn-info btn-block"
                value="Embed a Video" />
       </div>
-      <div class="col-xs-6">
-        <input type="submit" name="embed_type" class="btn btn-large btn-success btn-block" 
+      <div class="col-xs-4">
+        <input type="submit" name="embed_type" class="btn btn-large btn-success btn-block"
                value="Embed a Picture" />
+      </div>
+      <div class="col-xs-4">
+        <input type="submit" name="embed_type" class="btn btn-large btn-warning btn-block"
+               value="Embed a Link" />
       </div>
     </div>
   <%% end %>
