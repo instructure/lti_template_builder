@@ -1,0 +1,7 @@
+inject_into_file "lib/#{name}/engine.rb", after: "isolate_namespace #{name.classify}\n" do <<-"RUBY"
+
+    config.generators do |g|
+      g.test_framework :rspec
+    end
+RUBY
+end

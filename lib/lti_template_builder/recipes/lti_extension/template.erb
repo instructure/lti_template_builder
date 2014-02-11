@@ -1,0 +1,132 @@
+inject_into_file "app/controllers/#{name}/lti_controller.rb", after: "def index\n" do <<-"RUBY"
+      @launch_params = params.reject!{ |k,v| ['controller','action'].include? k }
+    end
+
+    def embed
+      launch_params = JSON.parse(params[:launch_params] || "{}")
+
+      tp = IMS::LTI::ToolProvider.new(nil, nil, launch_params)
+      tp.extend IMS::LTI::Extensions::Content::ToolProvider
+
+      # The following code is used as an example of content being returned.
+      # This should be replaced by actual logic.
+      embed_type = params[:embed_type]
+      if embed_type =~ /Video/
+        @title = "Getting Started in Canvas Network"
+        @url = "//player.vimeo.com/video/79702646"
+        @width = "500"
+        @height = "284"
+      elsif embed_type =~ /Picture/
+        @title = "Laughing Dog"
+        @url = "https://dl.dropboxusercontent.com/u/2176587/laughing_dog.jpeg"
+        @width = "284"
+        @height = "177"
+      else
+        @title  = "My Lti App"
+        @url    = "\#{root_url}" # <-- build return URL
+        @width  = 500 # <-- modal width (if applicable)
+        @height = 530 # <-- modal height (if applicable)
+      end
+
+      redirect_url = build_url(tp, @title, @url, @width, @height)
+
+      if redirect_url.present?
+        redirect_to redirect_url
+      end
+    end
+
+    def xml_config
+      host = "\#{request.protocol}\#{request.host_with_port}"
+      url = "\#{host}\#{root_path}"
+      title = "#{name.humanize.titleize}"
+      tool_id = "#{name}"
+      tc = IMS::LTI::ToolConfig.new(:title => title, :launch_url => url)
+      tc.extend IMS::LTI::Extensions::Canvas::ToolConfig
+      tc.description = "[description goes here]"
+      tc.canvas_privacy_anonymous!
+      tc.canvas_domain!(request.host)
+      tc.canvas_icon_url!("\#{host}/assets/#{name}/icon.png")
+      tc.canvas_text!(title)
+      tc.set_ext_param('canvas.instructure.com', :tool_id, tool_id)
+<%= @additional_configs.join("\n") %>
+      render xml: tc.to_xml
+    end
+
+    def health_check
+      head 200
+    end
+
+    private
+
+    def build_url(tp, title, url, width, height)
+      if tp.accepts_content?
+        if tp.accepts_iframe?
+          redirect_url = tp.iframe_content_return_url(url, width, height, title)
+        elsif tp.accepts_url?
+          redirect_url = tp.url_content_return_url(url, title)
+        elsif tp.accepts_lti_launch_url?
+          redirect_url = tp.lti_launch_content_return_url(url, title, title)
+        end
+        return redirect_url
+      end
+RUBY
+end
+
+route 'root "lti#index"'
+route 'match "/" => "lti#index", via: [:get, :post]'
+route 'get "health_check" => "lti#health_check"'
+route 'get "config(.xml)" => "lti#xml_config", as: :lti_xml_config'
+
+remove_file "app/views/#{name}/lti/index.html.erb"
+create_file "app/views/#{name}/lti/index.html.erb" do <<-'RUBY'
+<div class="container">
+  <h4 class="page-header">
+    <%%= link_to "config.xml", lti_xml_config_path, class: "btn btn-xs btn-primary pull-right" %>
+    <%%= image_tag "NAME/icon.png" %> My LTI App
+  </h4>
+
+  <p>
+    This is an example of how you can select a resource and have it be embedded via LTI.
+  </p>
+
+  <%%= form_tag lti_embed_path do %>
+    <input type="hidden" name="launch_params" value="<%%= @launch_params.to_json %>" />
+    <div class="row">
+      <div class="col-xs-6">
+        <input type="submit" name="embed_type" class="btn btn-large btn-info btn-block" 
+               value="Embed a Video" />
+      </div>
+      <div class="col-xs-6">
+        <input type="submit" name="embed_type" class="btn btn-large btn-success btn-block" 
+               value="Embed a Picture" />
+      </div>
+    </div>
+  <%% end %>
+</div>
+RUBY
+end
+
+gsub_file "app/views/#{name}/lti/index.html.erb", "NAME", name
+
+create_file "app/views/#{name}/lti/embed.html.erb" do <<-'RUBY'
+<div class="container">
+  <h4 class="page-header">Embed Code Generated</h4>
+  <p>
+    You're not in a system that supports auto-inserting content,
+    so you'll need to copy and past the following code by hand
+    in order to insert it into your content.
+  </p>
+
+  <textarea class="form-control" rows="4"><iframe title="<%%= @title %>" width="<%%= @width %>" height="<%%= @height %>" src="<%%= @url %>" /></textarea>
+</div>
+RUBY
+end
+
+inject_into_file "app/controllers/#{name}/lti_controller.rb", after: "require_dependency \"#{name}/application_controller\"\n" do <<-"RUBY"
+
+require "ims/lti"
+RUBY
+end
+
+gsub_file "spec/controllers/#{name}/lti_controller_spec.rb", "get 'index'\n", "get 'index', use_route: :#{name}\n"
+

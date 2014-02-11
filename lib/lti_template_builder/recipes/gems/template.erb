@@ -1,0 +1,15 @@
+inject_into_file "#{name}.gemspec", after: "s.add_development_dependency \"sqlite3\"\n" do <<-'RUBY'
+<% @gem_dependencies.each do |dep| %>
+  s.add_dependency <%= dep.map { |str| "\"#{str}\"" }.join(", ") %>
+<% end %>
+<% @gem_dev_dependencies.each do |dep| %>
+  s.add_development_dependency <%= dep.map { |str| "\"#{str}\"" }.join(", ") %>
+<% end %>
+RUBY
+end
+
+run "bundle install"
+
+<% @after_bundle_commands.each do |cmd| %>
+<%= cmd %>
+<% end %>

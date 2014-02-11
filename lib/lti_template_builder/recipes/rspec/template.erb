@@ -1,0 +1,61 @@
+append_file ".gitignore" do <<-'RUBY'
+spec/test_app/db/*.sqlite3
+spec/test_app/db/*.sqlite3-journal
+spec/test_app/log/*.log
+spec/test_app/tmp/
+spec/test_app/.sass-cache
+spec/test_app/config/lti_public_resources_config.yml
+spec/test_app/config/*.yml
+RUBY
+end
+
+append_file "Rakefile" do <<-'RUBY'
+Dir[File.join(File.dirname(__FILE__), 'tasks/**/*.rake')].each {|f| load f }
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec)
+task :default => :spec
+RUBY
+end
+
+inject_into_file "lib/#{name}/engine.rb", after: "isolate_namespace #{name.classify}\n" do <<-"RUBY"
+
+    config.generators do |g|
+      g.test_framework :rspec
+    end
+RUBY
+end
+
+gsub_file "spec/spec_helper.rb", "../../config/environment", "../test_app/config/environment"
+
+inject_into_file "spec/spec_helper.rb", after: "require 'rspec/autorun'\n" do <<-"RUBY"
+require 'capybara/rspec'
+require 'capybara/rails'
+require 'capybara/poltergeist'
+
+Capybara.javascript_driver = :poltergeist
+RUBY
+end
+
+remove_file "app/views/#{name}/test/backdoor.html.erb"
+create_file "app/views/#{name}/test/backdoor.html.erb" do <<-"RUBY"
+<p>Form to access root page via POST. Used for tests.</p>
+<%%= form_tag root_path do %>
+  <button type="submit" id="submit">Submit</button>
+<%% end %>
+RUBY
+end
+
+gsub_file "spec/controllers/#{name}/test_controller_spec.rb", "get 'backdoor'\n", "get 'backdoor', use_route: :#{name}\n"
+
+create_file "spec/features/#{name}/workflow_spec.rb" do <<-"RUBY"
+require 'spec_helper'
+
+describe 'Workflow', type: :request, js: true do
+  it 'app should be accessible via POST' do
+    visit '/#{name}/test/backdoor'
+    click_button('Submit')
+    expect(page).to have_content 'My LTI App'
+  end
+end
+RUBY
+end

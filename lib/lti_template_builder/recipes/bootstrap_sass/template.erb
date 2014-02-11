@@ -1,0 +1,7 @@
+# TODO: This should be done differently!!!!
+
+remove_file "app/assets/stylesheets/#{name}/application.css"
+create_file "app/assets/stylesheets/#{name}/application.scss" do <<-'RUBY'
+@import "bootstrap";
+RUBY
+end
