@@ -1,0 +1,12 @@
+append_file "Rakefile" do <<-'RUBY'
+
+desc 'Run the test dummy rails app'
+task :run_engine do
+  exec 'cd spec/test_app && bundle exec rails s'
+end
+RUBY
+end
+
+gem_group :development, :test do
+  gem "jazz_hands"
+end

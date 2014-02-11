@@ -14,6 +14,7 @@ class Server < Sinatra::Base
     builder.add :cors_support
     builder.add :rspec
     builder.add :lti_extension, { enabled_extensions: [:editor_button, :resource_selection] }
+    builder.add :extra
     builder.to_s
   end
 

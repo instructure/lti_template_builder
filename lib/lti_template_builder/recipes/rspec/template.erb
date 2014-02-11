@@ -1,13 +1,13 @@
-append_file ".gitignore" do <<-'RUBY'
-spec/test_app/db/*.sqlite3
-spec/test_app/db/*.sqlite3-journal
-spec/test_app/log/*.log
-spec/test_app/tmp/
-spec/test_app/.sass-cache
-spec/test_app/config/lti_public_resources_config.yml
-spec/test_app/config/*.yml
-RUBY
-end
+# append_file ".gitignore" do <<-'RUBY'
+# spec/test_app/db/*.sqlite3
+# spec/test_app/db/*.sqlite3-journal
+# spec/test_app/log/*.log
+# spec/test_app/tmp/
+# spec/test_app/.sass-cache
+# spec/test_app/config/lti_public_resources_config.yml
+# spec/test_app/config/*.yml
+# RUBY
+# end
 
 append_file "Rakefile" do <<-'RUBY'
 Dir[File.join(File.dirname(__FILE__), 'tasks/**/*.rake')].each {|f| load f }

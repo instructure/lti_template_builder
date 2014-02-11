@@ -12,6 +12,14 @@ module LtiTemplateBuilder
       @additional_configs << "      tc.canvas_account_navigation!(enabled: true)"  if @enabled_extensions.include? :account_navigation
       @additional_configs << "      tc.canvas_course_navigation!(enabled: true)"   if @enabled_extensions.include? :course_navigation
       @additional_configs << "      tc.canvas_user_navigation!(enabled: true)"     if @enabled_extensions.include? :user_navigation
+
+      @extra_expects = ["\n"]
+      @extra_expects << "          expect(response.body).to include('<lticm:options name=\"homework_submission\">')" if @enabled_extensions.include? :homework_submission
+      @extra_expects << "          expect(response.body).to include('<lticm:options name=\"editor_button\">')"       if @enabled_extensions.include? :editor_button
+      @extra_expects << "          expect(response.body).to include('<lticm:options name=\"resource_selection\">')"  if @enabled_extensions.include? :resource_selection
+      @extra_expects << "          expect(response.body).to include('<lticm:options name=\"account_navigation\">')"  if @enabled_extensions.include? :account_navigation
+      @extra_expects << "          expect(response.body).to include('<lticm:options name=\"course_navigation\">')"   if @enabled_extensions.include? :course_navigation
+      @extra_expects << "          expect(response.body).to include('<lticm:options name=\"user_navigation\">')"     if @enabled_extensions.include? :user_navigation
     end
   end
 end

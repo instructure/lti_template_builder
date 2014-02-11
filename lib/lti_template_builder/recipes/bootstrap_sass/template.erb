@@ -5,3 +5,9 @@ create_file "app/assets/stylesheets/#{name}/application.scss" do <<-'RUBY'
 @import "bootstrap";
 RUBY
 end
+
+inject_into_file "lib/#{name}.rb", before: "module" do <<-'RUBY'
+require "bootstrap-sass"
+
+RUBY
+end

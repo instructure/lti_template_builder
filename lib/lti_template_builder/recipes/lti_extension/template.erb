@@ -130,3 +130,35 @@ end
 
 gsub_file "spec/controllers/#{name}/lti_controller_spec.rb", "get 'index'\n", "get 'index', use_route: :#{name}\n"
 
+route 'post "embed" => "lti#embed", as: :lti_embed'
+
+inject_into_file "spec/controllers/#{name}/lti_controller_spec.rb", after: "response.should be_success\n      end\n" do <<-"RUBY"
+      describe "GET config" do
+        it "should generate a valid xml cartridge" do
+          request.stub(:env).and_return({
+            "SCRIPT_NAME"     => "/#{name}",
+            "rack.url_scheme" => "http",
+            "HTTP_HOST"       => "test.host",
+            "PATH_INFO"       => "/#{name}"
+          })
+          get 'xml_config', use_route: :#{name}
+          expect(response.body).to include('<blti:title>#{name.humanize.titleize}</blti:title>')
+          expect(response.body).to include('<blti:description>[description goes here]</blti:description>')
+          expect(response.body).to include('<lticm:property name="text">#{name.humanize.titleize}</lticm:property>')
+          expect(response.body).to include('<lticm:property name="tool_id">#{name}</lticm:property>')
+          expect(response.body).to include('<lticm:property name=\"icon_url\">http://test.host/assets/#{name}/icon.png</lticm:property>')
+        end
+      end
+RUBY
+end
+
+inject_into_file "spec/controllers/#{name}/lti_controller_spec.rb", after: "icon.png</lticm:property>')" do <<-"RUBY"
+
+<%= @extra_expects.join("\n") %>
+RUBY
+end
+
+inside("app/assets/images/#{name}") do
+  run "curl -O https://dl.dropboxusercontent.com/u/2176587/icon.png"
+end
+
