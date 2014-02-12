@@ -16,9 +16,9 @@ App.IndexController = Ember.ArrayController.extend({
   }.property('selectedExtensions', 'appName'),
 
   installCommand: function() {
-    return "rails plugin new " + this.get('appName') + " -T \/\n\
-    --mountable \/\n\
-    --dummy-path=spec/test_app \/\n\
+    return "rails plugin new " + this.get('appName') + " -T \\\n\
+    --mountable \\\n\
+    --dummy-path=spec/test_app \\\n\
     -m " + this.get('buildUrl');
   }.property('buildUrl'),
 
