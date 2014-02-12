@@ -9,6 +9,16 @@ module LtiTemplateBuilder
       @recipes = []
     end
 
+    def self.recipes
+      recipe_list = {}
+      Recipe.descendants.each do |descendant|
+        recipe_name = Recipe.declassify(descendant.to_s).to_sym
+        next if recipe_name == :gems
+        recipe_list[recipe_name] = descendant.description
+      end
+      recipe_list
+    end
+
     def add_gem_recipe
       recipe = LtiTemplateBuilder::Gems.new
       recipe.setup({

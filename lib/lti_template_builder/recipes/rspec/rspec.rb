@@ -1,5 +1,9 @@
 module LtiTemplateBuilder
   class Rspec < Recipe
+    def self.description
+      "Add rspec-rails gem along with capybara and poltergeist for testing"
+    end
+
     def setup(args={})
       @gem_dev_dependencies << ["rspec-rails"]
       @gem_dev_dependencies << ["capybara"]

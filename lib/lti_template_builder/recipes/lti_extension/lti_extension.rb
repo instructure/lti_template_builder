@@ -1,5 +1,9 @@
 module LtiTemplateBuilder
   class LtiExtension < Recipe
+    def self.description
+      "Installs all things LTI related (ims-lti gem and extensions)"
+    end
+
     def setup(args)
       @gem_dependencies << ["ims-lti"]
       @enabled_extensions = args[:enabled_extensions] || []

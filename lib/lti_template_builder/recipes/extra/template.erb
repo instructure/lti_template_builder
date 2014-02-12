@@ -4,6 +4,14 @@ desc 'Run the test dummy rails app'
 task :run_engine do
   exec 'cd spec/test_app && bundle exec rails s'
 end
+
+desc 'Run a pry console'
+task :console do
+  require 'pry'
+  require '#{name}'
+  ARGV.clear
+  Pry.start
+end
 RUBY
 end
 

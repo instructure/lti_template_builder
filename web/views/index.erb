@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>LTI Template Builder</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style type="text/css" media="all">
+      body {
+        padding-top: 20px;
+        padding-bottom: 20px;
+      }
+      .header {
+        border-bottom: 1px solid #e5e5e5;
+        margin-bottom: 20px;
+      }
+      .header h3 {
+        margin-top: 0;
+        margin-bottom: 0;
+        line-height: 40px;
+        padding-bottom: 19px;
+      }
+      .extension-header {
+        margin-top: 15px;
+      }
+      .extension-header h4 {
+        background-color: #efefef;
+        padding: 10px 15px 10px 35px;
+      }
+      .extension-header.active h4 {
+        background-color: #80f1b1;
+      }
+      .footer {
+        margin-top: 20px;
+        padding-top: 19px;
+        color: #777;
+        border-top: 1px solid #e5e5e5;
+      }
+      @media (min-width: 768px) {
+        .container {
+          max-width: 730px;
+        }
+      }
+      .container-narrow > hr {
+        margin: 30px 0;
+      }
+      ul.nav li {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+
+    <a href="https://github.com/instructure/lti_template_builder"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a>
+
+    <script type="text/x-handlebars">
+      <div class="container">
+        <div class="header">
+          <h3>LTI Template Builder</h3>
+        </div>
+
+        {{outlet}}
+
+        <div class="footer">
+          <p>Developed with love by <a href="http://www.instructure.com">Instructure</a>.</p>
+        </div>
+      </div>
+    </script>
+
+    <script type="text/x-handlebars" id="index">
+      <div class="row">
+        <div class="col-xs-12">
+          <p>
+            The LTI template builder is a highly opinionated template generator which can 
+            be used in building Rails mountable engines. <strong class="text-warning">Prerequisets: ruby, rails, bundler</strong>.
+          </p>
+          <p>To use the builder, follow the steps below:</p>
+        </div>
+        <div class="col-xs-12">
+          <hr/>
+          <h3>Step 1: Choose the LTI extensions you want to implement</h3>
+          {{#each ext in model}}
+            <div class="row">
+              <div {{bind-attr class=":col-xs-12 :extension-header ext.isSelected:active"}}>
+                <h4 class="checkbox">
+                  <label>
+                    {{input type="checkbox" checked=ext.isSelected}}
+                    {{ext.name}}
+                  </label>
+                </h4>
+              </div>
+            </div>
+            <div class="row">
+              {{#if ext.imageUrl}}
+                <div class="col-xs-4">
+                  <img {{bind-attr src=ext.imageUrl}} class="img-responsive img-rounded">
+                </div>
+                <div class="col-xs-8">
+                  <p>{{ext.description}}</p>
+                  <a {{bind-attr href=ext.link}} class="btn btn-xs btn-default" target="_blank">documentation</a></p>
+                </div>
+              {{else}}
+                <div class="col-xs-12">
+                  <p>{{ext.description}}</p>
+                  <a {{bind-attr href=ext.link}} class="btn btn-xs btn-default" target="_blank">documentation</a></p>
+                </div>
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
+        <div class="col-xs-12">
+          <hr/>
+          <h3>Step 2: Name your application</h3>
+          <p>The name must be underscored with no spaces or special characters (e.g. my_lti_app)</p>
+          {{input type="text" value=appName class="form-control"}}
+        </div>
+        <div class="col-xs-12">
+          <hr/>
+          <h3>Step 3: Run the following command in your console</h3>
+          <pre><code>{{installCommand}}</code></pre>
+        </div>
+      </div>
+    </script>
+
+    <script>
+       window.ENV = { host: '<%= @base_url %>' };
+    </script>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v1.2.1.js"></script>
+    <script src="http://builds.emberjs.com/tags/v1.3.2/ember.js"></script>
+    <script src="/js/app.js"></script>
+  </body>
+</html>
+

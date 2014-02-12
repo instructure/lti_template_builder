@@ -4,16 +4,18 @@ require File.expand_path('../../lib/lti_template_builder', __FILE__)
 class Server < Sinatra::Base
 
   get '/' do
-    "rails plugin new my_lti_app -T --mountable --dummy-path=spec/test_app -m http://localhost:9292/template"
+    @base_url ||= "#{request.env['rack.url_scheme']}://#{request.env['HTTP_HOST']}"
+    erb :index
   end
 
-  get '/template' do
+  get '/template/' do
     content_type :text
+    extensions = params[:ext].split(',').map(&:to_sym)
     builder = LtiTemplateBuilder::Builder.new
     builder.add :bootstrap_sass
     builder.add :cors_support
     builder.add :rspec
-    builder.add :lti_extension, { enabled_extensions: [:editor_button, :resource_selection] }
+    builder.add :lti_extension, { enabled_extensions: extensions }
     builder.add :extra
     builder.to_script
   end

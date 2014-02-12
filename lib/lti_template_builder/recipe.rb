@@ -4,10 +4,18 @@ module LtiTemplateBuilder
   class Recipe
     attr_accessor :gem_dependencies, :gem_dev_dependencies, :after_bundle_commands
 
+    def self.description
+      "missing description"
+    end
+
     def initialize
       @gem_dependencies = []
       @gem_dev_dependencies = []
       @after_bundle_commands = []
+    end
+
+    def self.descendants
+      ObjectSpace.each_object(Class).select { |klass| klass < self }
     end
 
     def setup(args={})
@@ -25,11 +33,14 @@ module LtiTemplateBuilder
       erb.result(self.instance_eval { binding })
     end
 
+    def self.declassify(str)
+      str.split("::").last.underscore
+    end
+
     protected
 
     def recipe_name
-      class_name = self.class.name
-      class_name.split("::").last.underscore
+      Recipe.declassify(self.class.name)
     end
 
   end

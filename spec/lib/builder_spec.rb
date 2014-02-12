@@ -14,5 +14,11 @@ module LtiTemplateBuilder
       builder.gem_dependencies.count.should eq(1)
       builder.gem_dev_dependencies.count.should eq(3)
     end
+
+    it "should return a list of available recipes" do
+      recipes = Builder.recipes
+      puts recipes.inspect
+      recipes.length.should eq(5)
+    end
   end
 end
