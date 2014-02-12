@@ -4,6 +4,8 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'sinatra'
+gem 'thin'
+gem 'foreman'
 
 group :development, :test do
   gem 'guard-rspec'
