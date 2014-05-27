@@ -91,6 +91,7 @@ route 'match "/" => "lti#index", via: [:get, :post]'
 route 'get "health_check" => "lti#health_check"'
 route 'get "config(.xml)" => "lti#xml_config", as: :lti_xml_config'
 route 'match  "launch" => "lti#launch", as: :launch, via: [:get, :post]'
+route 'get "test/backdoor"'
 
 remove_file "app/views/#{name}/lti/index.html.erb"
 create_file "app/views/#{name}/lti/index.html.erb" do <<-'RUBY'

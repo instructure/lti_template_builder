@@ -4,8 +4,7 @@
 [![Code Climate](https://codeclimate.com/github/instructure/lti_template_builder.png)](https://codeclimate.com/github/instructure/lti_template_builder)
 [![Gem Version](https://badge.fury.io/rb/lti_template_builder.png)](http://badge.fury.io/rb/lti_template_builder)
 
-Template generator for building LTI apps quickly on top of Rails
-mountable engines.
+Template generator for building LTI apps quickly on top of Rails mountable engines.
 
 ## Installation
 
